@@ -10,3 +10,15 @@ void loop()
   digitalWrite(LED_BUILDIN, LOW);
   delay(1000);
 }
+
+//-----pseudocode-----
+//BEGIN setup
+//    Set the built-in LED pin as an OUTPUT
+//END setup
+
+//BEGIN loop
+//    Turn the built-in LED ON
+//    Wait for 1 second
+//    Turn the built-in LED OFF
+//    Wait for 1 second
+//END loop
