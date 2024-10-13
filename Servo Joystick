@@ -1,0 +1,45 @@
+#include <Servo.h>
+
+Servo servo1;
+
+int joystick = A0;
+
+void setup() 
+{
+  // put your setup code here, to run once:
+  servo1.attach(9);
+  Serial.begin(9600);
+}
+
+void loop() 
+{
+  int joystickVal = analogRead(joystick);
+
+  int servoPos = map(joystickVal, 0, 1023, 0, 180);
+
+  servo1.write(servoPos);
+
+  Serial.print("Pfffftttt your servo position is: ");
+  Serial.println(servoPos);
+
+  delay(15);
+}
+
+
+------------------------PSEUDOCODE---------------------
+1. Import the Servo library to control the servo motor.
+
+2. Declare a servo object named servo1.
+
+3. Set up a variable to hold the joystick's analog pin (joystick = A0).
+
+4. Setup function:
+    Attach the servo object to digital pin 9.
+    Initialize serial communication at a baud rate of 9600.
+
+5. Main loop:
+    Read the analog value from the joystick.
+    Map the joystick value (range 0-1023) to the servo's range (0-180 degrees).
+    Move the servo to the calculated position.
+    Print the current servo position to the serial monitor.
+    Wait for 15 milliseconds before repeating the loop.
