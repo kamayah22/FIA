@@ -1,0 +1,59 @@
+// Pin definitions for motor driver connections
+const int ENA = 9;     // Speed control for Motor A
+const int IN1 = 8;     // Direction control for Motor A
+const int IN2 = 7;     // Direction control for Motor A
+
+const int ENB = 10;    // Speed control for Motor B
+const int IN3 = 6;     // Direction control for Motor B
+const int IN4 = 5;     // Direction control for Motor B
+
+void setup() {
+  // Set all the motor control pins to output mode
+  pinMode(ENA, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+
+  pinMode(ENB, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  // Set the initial state to LOW
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+}
+
+void loop() {
+  // Drive forward
+  digitalWrite(IN1, HIGH);  // Motor A forward
+  digitalWrite(IN2, LOW);   // Motor A direction
+  digitalWrite(IN3, HIGH);  // Motor B forward
+  digitalWrite(IN4, LOW);   // Motor B direction
+  analogWrite(ENA, 200);    // Speed for Motor A (0-255)
+  analogWrite(ENB, 200);    // Speed for Motor B (0-255)
+  delay(2000);              // Move forward for 2 seconds
+
+  // Stop
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+  delay(1000);              // Pause for 1 second
+
+  // Drive backward
+  digitalWrite(IN1, LOW);   // Motor A backward
+  digitalWrite(IN2, HIGH);  // Motor A direction
+  digitalWrite(IN3, LOW);   // Motor B backward
+  digitalWrite(IN4, HIGH);  // Motor B direction
+  analogWrite(ENA, 200);    // Speed for Motor A
+  analogWrite(ENB, 200);    // Speed for Motor B
+  delay(2000);              // Move backward for 2 seconds
+
+  // Stop
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+  delay(1000);              // Pause for 1 second
+}
