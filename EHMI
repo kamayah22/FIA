@@ -1,0 +1,47 @@
+// Define the pins for LEDs
+const int led1 = 2;
+const int led2 = 3;
+const int led3 = 4;
+
+
+// Define the pins for push buttons
+const int button1 = 6;
+const int button2 = 7;
+const int button3 = 8;
+
+
+void setup() {
+  // Set LED pins as OUTPUT
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+  pinMode(led3, OUTPUT);
+
+
+  // Set button pins as INPUT
+  pinMode(button1, INPUT);
+  pinMode(button2, INPUT);
+  pinMode(button3, INPUT);
+  
+}
+
+void loop() {
+  // Check the state of each button and turn on the corresponding LED
+
+  if (digitalRead(button1) == HIGH) {
+    digitalWrite(led1, HIGH);  // Turn on LED 1
+  } else {
+    digitalWrite(led1, LOW);   // Turn off LED 1
+  }
+
+  if (digitalRead(button2) == HIGH) {
+    digitalWrite(led2, HIGH);  // Turn on LED 2
+  } else {
+    digitalWrite(led2, LOW);   // Turn off LED 2
+  }
+
+  if (digitalRead(button3) == HIGH) {
+    digitalWrite(led3, HIGH);  // Turn on LED 3
+  } else {
+    digitalWrite(led3, LOW);   // Turn off LED 3
+  }
+}
