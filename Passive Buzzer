@@ -1,0 +1,37 @@
+// Pin connected to the passive buzzer
+const int buzzerPin = 8;
+
+// Note frequencies (in Hz) for Do-Re-Mi scale
+const int NOTE_C4 = 261;
+const int NOTE_D4 = 294;
+const int NOTE_E4 = 330;
+const int NOTE_F4 = 349;
+const int NOTE_G4 = 392;
+const int NOTE_A4 = 440;
+const int NOTE_B4 = 494;
+const int NOTE_C5 = 523;
+
+void setup() {
+  // Nothing to set up for this example
+}
+
+void loop() {
+  // Play the melody "Do Re Mi Fa Sol La Ti Do"
+  playNote(NOTE_C4, 500);  // Do
+  playNote(NOTE_D4, 500);  // Re
+  playNote(NOTE_E4, 500);  // Mi
+  playNote(NOTE_F4, 500);  // Fa
+  playNote(NOTE_G4, 500);  // Sol
+  playNote(NOTE_A4, 500);  // La
+  playNote(NOTE_B4, 500);  // Ti
+  playNote(NOTE_C5, 500);  // Do (high)
+  delay(1000);             // Pause before repeating
+}
+
+// Function to play a note on the passive buzzer
+void playNote(int frequency, int duration) {
+  tone(buzzerPin, frequency, duration);
+  delay(duration);        // Wait for the note to finish playing
+  noTone(buzzerPin);      // Stop the tone
+  delay(50);              // Short pause between notes
+}
