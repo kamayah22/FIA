@@ -1,0 +1,70 @@
+
+//DEFINE CONSTANTS
+#define NUM_LED 6      //sets the maximum numbers of LEDs
+#define MAX 150        //maximum posible muscle reading. TWEAK THIS VALUE!!   (See Sensitivity Note)
+
+//DECLARE VARIABLES
+int reading[10];       //reading, an array to store analog readings
+int finalReading;      // finalReading stores an averaged value of the array
+byte litLeds = 0;      // keep track of the #LEDs lit
+byte multiplier = 1;   //used to modify the sensor's reading
+byte leds[] = {8, 9, 10, 11, 12, 13};    //array holding the pin numbers for each LED on arduino
+
+void setup()
+{
+  Serial.begin(9600);   //begin serial communications
+  for(int i = 0; i < NUM_LED; i++) //initialize LEDs as outputs
+  { 
+    pinMode(leds[i], OUTPUT); 
+  }
+}
+
+void loop()
+{
+  //SIGNAL CAPTURING
+  for(int i = 0; i < 10; i++)     //LOOP 1: take ten readings in ~0.02 seconds
+  {                
+    reading[i] = analogRead(A0) * multiplier;  //Take multiple readings: Read analog data from the sensor 10 times, store each in the reading array, and delay briefly between readings.
+    delay(2);
+  }
+
+//SIGNAL PROCESSING
+  for(int i = 0; i < 10; i++) //LOOP 2: Average the readings to get a smoother value.
+  {   
+    finalReading += reading[i]; //average the ten readings
+  }
+  finalReading /= 10;
+
+//SIGNAL VISUALIZATION
+  for(int j = 0; j < NUM_LED; j++)   //write all LEDs low
+  {  
+    digitalWrite(leds[j], LOW);
+  }
+
+  Serial.print(finalReading);      //Display the averaged reading
+  Serial.print("\t");
+
+
+  finalReading = constrain(finalReading, 0, MAX);      // Constrain the averaged value within the range from 0 to MAX
+  litLeds = map(finalReading, 0, MAX, 0, NUM_LED);     //Map the constrained value to determine how many LEDs should be lit       
+  for(int k = 0; k < litLeds; k++)                    //Light up the corresponding number of LEDs based on the mapped value.
+  {
+    digitalWrite(leds[k], HIGH);
+  }
+
+  Serial.println(litLeds);          //Display the number of leds to be lit
+
+
+  //for serial debugging, uncomment the next two lines.
+  //Serial.println(finalReading);
+  //delay(100);
+}
+
+//Electrode Connection:  Hook the two red clips onto your arm and place the black one on the back of your wrist.
+
+//Sensitivity:  If you feel the LEDs don't light up proportionately to your arm strength,
+              // you can adjust the sensitivity with the white button on the shield.
+            // You can also tweak the MAX constant from 4 to another value until the 
+            // represented value is proportional to your strength. If the electrodes 
+          // light up really easily, increase this value - if you are having a 
+            // hard time making all the electrodes light up, lower it!
