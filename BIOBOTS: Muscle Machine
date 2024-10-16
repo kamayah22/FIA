@@ -12,7 +12,7 @@ byte leds[] = {8, 9, 10, 11, 12, 13};    //array holding the pin numbers for eac
 
 void setup()
 {
-  Serial.begin(9600);   //begin serial communications
+  Serial.begin(9600);   //begin serial communications              (TUESDAY LEFT OFF HERE)
   for(int i = 0; i < NUM_LED; i++) //initialize LEDs as outputs
   { 
     pinMode(leds[i], OUTPUT); 
