@@ -98,3 +98,94 @@ void stopMotors() {
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, LOW);
 }
+
+
+
+
+
+
+
+
+QUESTION CODE
+// Pin definitions for motor driver connections
+const int ENA = 9;     // Speed control for Motor A
+const int IN1 = 8;     // Direction control for Motor A
+const int IN2 = 7;     // Direction control for Motor A
+
+const int ENB = 10;    // Speed control for Motor B
+const int IN3 = 6;     // Direction control for Motor B
+const int IN4 = 5;     // Direction control for Motor B
+
+// Pin definitions for ultrasonic sensor
+const int trigPin = ?????; // Trigger pin for ultrasonic sensor
+const int echoPin = ?????; // Echo pin for ultrasonic sensor
+
+// Distance threshold in centimeters
+const int distanceThreshold = ?????;
+
+void setup() {
+  // Set all the motor control pins to output mode
+  pinMode(ENA, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(ENB, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  // Set ultrasonic sensor pins
+  pinMode(trigPin, ?????);
+  pinMode(echoPin, ?????);
+
+  // Initialize motor state
+  stopMotors();
+
+  Serial.begin(9600); // Initialize serial for debugging
+}
+
+void loop() {
+  int distance = getDistance();
+
+  if (distance < distanceThreshold     //... then Obstacle detected, stop and reverse
+  {
+    //Stop RoboCar
+    // Reverse for 1 second
+    // Stop after reversing
+    delay(500);   // Pause to re-check distance
+  }else
+  {
+    // No obstacle, move forward
+
+  }
+}
+
+// Function to measure distance from ultrasonic sensor
+int getDistance() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Calculate the duration of the echo
+  long duration = pulseIn(echoPin, HIGH);
+
+  // Calculate distance in centimeters
+  int distance = duration * 0.034 / 2;
+  return distance;
+}
+
+// Motor control functions
+void forwardMotors()
+{
+  //Write function here
+}
+
+void reverseMotors()
+{
+  //Write function here
+}
+
+void stopMotors() 
+{
+  //Write function here
+}
