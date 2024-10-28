@@ -1,0 +1,100 @@
+// Pin definitions for motor driver connections
+const int ENA = 9;     // Speed control for Motor A
+const int IN1 = 8;     // Direction control for Motor A
+const int IN2 = 7;     // Direction control for Motor A
+
+const int ENB = 10;    // Speed control for Motor B
+const int IN3 = 6;     // Direction control for Motor B
+const int IN4 = 5;     // Direction control for Motor B
+
+// Pin definitions for ultrasonic sensor
+const int trigPin = 3; // Trigger pin for ultrasonic sensor
+const int echoPin = 2; // Echo pin for ultrasonic sensor
+
+// Distance threshold in centimeters
+const int distanceThreshold = 20;
+
+void setup() {
+  // Set all the motor control pins to output mode
+  pinMode(ENA, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(ENB, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  // Set ultrasonic sensor pins
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+
+  // Initialize motor state
+  stopMotors();
+
+  Serial.begin(9600); // Initialize serial for debugging
+}
+
+void loop() {
+  int distance = getDistance();
+
+  if (distance < distanceThreshold) {
+    // Obstacle detected, stop and reverse
+    Serial.println("Obstacle detected! Reversing...");
+    stopMotors();
+    delay(500);
+
+    // Reverse for 1 second
+    reverseMotors();
+    delay(1000);
+    
+    stopMotors(); // Stop after reversing
+    delay(500);   // Pause to re-check distance
+  } else {
+    // No obstacle, move forward
+    Serial.println("Path clear. Moving forward...");
+    forwardMotors();
+  }
+  
+  delay(100); // Short delay for stability
+}
+
+// Function to measure distance from ultrasonic sensor
+int getDistance() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Calculate the duration of the echo
+  long duration = pulseIn(echoPin, HIGH);
+
+  // Calculate distance in centimeters
+  int distance = duration * 0.034 / 2;
+  return distance;
+}
+
+// Motor control functions
+void forwardMotors() {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENA, 200);
+  analogWrite(ENB, 200);
+}
+
+void reverseMotors() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENA, 200);
+  analogWrite(ENB, 200);
+}
+
+void stopMotors() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+}
