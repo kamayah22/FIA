@@ -1,0 +1,72 @@
+// Define my pins for various components
+#define LEDGREEN 2
+#define LEDYELLOW 3
+#define LEDRED 4
+#define TRIGGER 5
+#define ECHO 6
+#define BUZZER 9
+
+// Define my constants
+const float sound = 34300.0;       // Speed of sound in cm/s
+const float threshold1 = 30.0;     // Threshold distance for green LED
+const float threshold2 = 20.0;     // Threshold distance for yellow LED
+const float threshold3 = 10.0;     // Threshold distance for red LED
+
+void setup() {
+  Serial.begin(9600);
+
+  pinMode(LEDGREEN, OUTPUT);
+  pinMode(LEDYELLOW, OUTPUT);
+  pinMode(LEDRED, OUTPUT);
+  pinMode(TRIGGER, OUTPUT);
+  pinMode(ECHO, INPUT);
+  pinMode(BUZZER, OUTPUT);
+
+  turnOffLEDs();
+}
+
+void loop() {
+  float distance = calculateDistance();
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  // Turn off all LEDs before setting the correct one
+  turnOffLEDs();
+
+  if (distance > threshold1) {
+    digitalWrite(LEDGREEN, HIGH);  // Turn on green LED
+  } 
+  else if (distance > threshold2) {
+    digitalWrite(LEDYELLOW, HIGH); // Turn on yellow LED
+  } 
+  else if (distance > threshold3) {
+    digitalWrite(LEDRED, HIGH);    // Turn on red LED
+  } 
+  else {
+    digitalWrite(LEDRED, HIGH);    // Turn on red LED
+    digitalWrite(BUZZER, HIGH);    // Activate buzzer if within closest threshold
+  }
+
+  delay(500); // Wait a bit before measuring again
+}
+
+void turnOffLEDs() {
+  digitalWrite(LEDGREEN, LOW);
+  digitalWrite(LEDYELLOW, LOW);
+  digitalWrite(LEDRED, LOW);
+  digitalWrite(BUZZER, LOW);
+}
+
+float calculateDistance() {
+  digitalWrite(TRIGGER, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIGGER, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIGGER, LOW);
+
+  unsigned long time = pulseIn(ECHO, HIGH);
+  float distance = time * sound * 0.00001 / 2.0;   // Calculate distance in cm
+
+  return distance;
+}
