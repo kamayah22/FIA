@@ -1,0 +1,173 @@
+#include <Servo.h>  // Include the Servo library
+
+Servo myservo;      // Create a servo object to control a servo motor
+
+// Pin assignments for ultrasonic sensor
+int Echo_Pin = A0;  // Ultrasonic module ECHO connected to A0
+int Trig_Pin = A1;  // Ultrasonic module TRIG connected to A1
+
+// Pin assignments for motor control
+#define Lpwm_pin  5     // PWM pin for left motor speed control (ENA of motor driver)
+#define Rpwm_pin  6     // PWM pin for right motor speed control (ENB of motor driver)
+int pinLB = 2;          // Left motor backward control (IN1 of motor driver)
+int pinLF = 4;          // Left motor forward control (IN2 of motor driver)
+int pinRB = 7;          // Right motor backward control (IN3 of motor driver)
+int pinRF = 8;          // Right motor forward control (IN4 of motor driver)
+
+// Variables for distance measurements
+volatile int D_mix;
+volatile int D_mid;
+volatile int D_max;
+volatile int Front_Distance;
+volatile int Left_Distance;
+volatile int Right_Distance;
+volatile int Right_IR_Value;
+volatile int Left_IR_Value;
+
+// Function to calculate the distance using the ultrasonic sensor
+float checkdistance() {
+  digitalWrite(Trig_Pin, LOW);          // Send a short low pulse to ensure clean signal start
+  delayMicroseconds(2);
+  digitalWrite(Trig_Pin, HIGH);         // Trigger a high pulse for 10 microseconds
+  delayMicroseconds(10);
+  digitalWrite(Trig_Pin, LOW);
+
+  float distance = pulseIn(Echo_Pin, HIGH) / 58.00;  // Calculate distance in cm
+  delay(10);
+  return distance;
+}
+
+// Function to detect left and right distances
+void Detect_Left_and_Right_distance() {
+  myservo.write(180);                   // Rotate servo to left position
+  delay(400);
+  Left_Distance = checkdistance();      // Measure left distance
+  delay(600);
+  Serial.print("Left_Distance: ");
+  Serial.println(Left_Distance);
+
+  myservo.write(0);                     // Rotate servo to right position
+  delay(400);
+  Right_Distance = checkdistance();     // Measure right distance
+  delay(600);
+  Serial.print("Right_Distance: ");
+  Serial.println(Right_Distance);
+
+  myservo.write(90);                    // Return servo to forward position
+}
+
+// Function for ultrasonic obstacle avoidance
+void Ultrasonic_obstacle_avoidance() {
+  Front_Distance = checkdistance();     // Get the front distance measurement
+  
+  if ((Front_Distance < 20) && (Front_Distance > 0)) {  // Check if an obstacle is close in front
+    stopp();                              // Stop the vehicle
+    delay(100);
+
+    myservo.write(180);                   // Check distance to the left
+    delay(500);
+    Left_Distance = checkdistance();
+    delay(100);
+
+    myservo.write(0);                     // Check distance to the right
+    delay(500);
+    Right_Distance = checkdistance();
+    delay(100);
+
+    // Decide to turn left or right based on distance measurements
+    if (Left_Distance > Right_Distance) {
+      rotate_left(150);                   // Turn left if left distance is greater
+      myservo.write(90);
+      delay(300);
+    } else {
+      rotate_right(150);                  // Turn right otherwise
+      myservo.write(90);
+      delay(300);
+    }
+  } else {
+    go_forward(100);                      // Go forward if no obstacle is detected
+  }
+}
+
+// Main obstacle avoidance function
+void Obstacle_Avoidance_Main() {
+  Ultrasonic_obstacle_avoidance();
+}
+
+// Setup function
+void setup() {
+  myservo.attach(A2);                    // Attach servo to A2
+  Serial.begin(9600);                    // Initialize serial communication for debugging
+
+  // Initialize distance and threshold variables
+  D_mix = 10;
+  D_mid = 20;
+  D_max = 100;
+  Front_Distance = 0;
+  Left_Distance = 0;
+  Right_Distance = 0;
+  myservo.write(90);                     // Set servo to center position
+
+  // Configure pins for ultrasonic sensor and motor control
+  pinMode(Echo_Pin, INPUT);
+  pinMode(Trig_Pin, OUTPUT);
+  pinMode(pinLB, OUTPUT);                // Left motor backward control
+  pinMode(pinLF, OUTPUT);                // Left motor forward control
+  pinMode(pinRB, OUTPUT);                // Right motor backward control
+  pinMode(pinRF, OUTPUT);                // Right motor forward control
+  pinMode(Lpwm_pin, OUTPUT);             // Left motor speed control (PWM)
+  pinMode(Rpwm_pin, OUTPUT);             // Right motor speed control (PWM)
+}
+
+// Main loop function
+void loop() {
+  Obstacle_Avoidance_Main();             // Continuously check and avoid obstacles
+}
+
+// Function to move forward at specified speed
+void go_forward(unsigned char speed_val) {
+  digitalWrite(pinRB, HIGH);
+  digitalWrite(pinRF, LOW);
+  digitalWrite(pinLB, HIGH);
+  digitalWrite(pinLF, LOW);
+  analogWrite(Lpwm_pin, speed_val);      // Set left motor speed
+  analogWrite(Rpwm_pin, speed_val);      // Set right motor speed
+}
+
+// Function to move backward at specified speed
+void go_backward(unsigned char speed_val) {
+  digitalWrite(pinRB, LOW);
+  digitalWrite(pinRF, HIGH);
+  digitalWrite(pinLB, LOW);
+  digitalWrite(pinLF, HIGH);
+  analogWrite(Lpwm_pin, speed_val);      // Set left motor speed
+  analogWrite(Rpwm_pin, speed_val);      // Set right motor speed
+}
+
+// Function to rotate left at specified speed
+void rotate_left(unsigned char speed_val) {
+  digitalWrite(pinRB, HIGH);
+  digitalWrite(pinRF, LOW);
+  digitalWrite(pinLB, LOW);
+  digitalWrite(pinLF, HIGH);
+  analogWrite(Lpwm_pin, speed_val);      // Set left motor speed
+  analogWrite(Rpwm_pin, speed_val);      // Set right motor speed
+}
+
+// Function to rotate right at specified speed
+void rotate_right(unsigned char speed_val) {
+  digitalWrite(pinRB, LOW);
+  digitalWrite(pinRF, HIGH);
+  digitalWrite(pinLB, HIGH);
+  digitalWrite(pinLF, LOW);
+  analogWrite(Lpwm_pin, speed_val);      // Set left motor speed
+  analogWrite(Rpwm_pin, speed_val);      // Set right motor speed
+}
+
+// Function to stop all motor movement
+void stopp() {
+  digitalWrite(pinRB, HIGH);
+  digitalWrite(pinRF, HIGH);
+  digitalWrite(pinLB, HIGH);
+  digitalWrite(pinLF, HIGH);
+}
