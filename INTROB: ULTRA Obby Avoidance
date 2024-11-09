@@ -24,6 +24,31 @@ volatile int Right_Distance;
 volatile int Right_IR_Value;
 volatile int Left_IR_Value;
 
+// Setup function
+void setup() {
+  myservo.attach(A2);                    // Attach servo to A2
+  Serial.begin(9600);                    // Initialize serial communication for debugging
+
+  // Initialize distance and threshold variables
+  D_mix = 10;
+  D_mid = 20;
+  D_max = 100;
+  Front_Distance = 0;
+  Left_Distance = 0;
+  Right_Distance = 0;
+  myservo.write(90);                     // Set servo to center position
+
+  // Configure pins for ultrasonic sensor and motor control
+  pinMode(Echo_Pin, INPUT);
+  pinMode(Trig_Pin, OUTPUT);
+  pinMode(pinLB, OUTPUT);                // Left motor backward control
+  pinMode(pinLF, OUTPUT);                // Left motor forward control
+  pinMode(pinRB, OUTPUT);                // Right motor backward control
+  pinMode(pinRF, OUTPUT);                // Right motor forward control
+  pinMode(Lpwm_pin, OUTPUT);             // Left motor speed control (PWM)
+  pinMode(Rpwm_pin, OUTPUT);             // Right motor speed control (PWM)
+}
+
 // Function to calculate the distance using the ultrasonic sensor
 float checkdistance() {
   digitalWrite(Trig_Pin, LOW);          // Send a short low pulse to ensure clean signal start
@@ -94,30 +119,7 @@ void Obstacle_Avoidance_Main() {
   Ultrasonic_obstacle_avoidance();
 }
 
-// Setup function
-void setup() {
-  myservo.attach(A2);                    // Attach servo to A2
-  Serial.begin(9600);                    // Initialize serial communication for debugging
 
-  // Initialize distance and threshold variables
-  D_mix = 10;
-  D_mid = 20;
-  D_max = 100;
-  Front_Distance = 0;
-  Left_Distance = 0;
-  Right_Distance = 0;
-  myservo.write(90);                     // Set servo to center position
-
-  // Configure pins for ultrasonic sensor and motor control
-  pinMode(Echo_Pin, INPUT);
-  pinMode(Trig_Pin, OUTPUT);
-  pinMode(pinLB, OUTPUT);                // Left motor backward control
-  pinMode(pinLF, OUTPUT);                // Left motor forward control
-  pinMode(pinRB, OUTPUT);                // Right motor backward control
-  pinMode(pinRF, OUTPUT);                // Right motor forward control
-  pinMode(Lpwm_pin, OUTPUT);             // Left motor speed control (PWM)
-  pinMode(Rpwm_pin, OUTPUT);             // Right motor speed control (PWM)
-}
 
 // Main loop function
 void loop() {
