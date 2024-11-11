@@ -81,50 +81,7 @@ void Detect_Left_and_Right_distance() {
   myservo.write(90);                    // Return servo to forward position
 }
 
-// Function for ultrasonic obstacle avoidance
-void Ultrasonic_obstacle_avoidance() {
-  Front_Distance = checkdistance();     // Get the front distance measurement
-  
-  if ((Front_Distance < 20) && (Front_Distance > 0)) {  // Check if an obstacle is close in front
-    stopp();                              // Stop the vehicle
-    delay(100);
 
-    myservo.write(180);                   // Check distance to the left
-    delay(500);
-    Left_Distance = checkdistance();
-    delay(100);
-
-    myservo.write(0);                     // Check distance to the right
-    delay(500);
-    Right_Distance = checkdistance();
-    delay(100);
-
-    // Decide to turn left or right based on distance measurements
-    if (Left_Distance > Right_Distance) {
-      rotate_left(150);                   // Turn left if left distance is greater
-      myservo.write(90);
-      delay(300);
-    } else {
-      rotate_right(150);                  // Turn right otherwise
-      myservo.write(90);
-      delay(300);
-    }
-  } else {
-    go_forward(100);                      // Go forward if no obstacle is detected
-  }
-}
-
-// Main obstacle avoidance function
-void Obstacle_Avoidance_Main() {
-  Ultrasonic_obstacle_avoidance();
-}
-
-
-
-// Main loop function
-void loop() {
-  Obstacle_Avoidance_Main();             // Continuously check and avoid obstacles
-}
 
 // Function to move forward at specified speed
 void go_forward(unsigned char speed_val) {
@@ -174,6 +131,39 @@ void stopp() {
   digitalWrite(pinLF, HIGH);
 }
 
+// Function for ultrasonic obstacle avoidance
+void loop 
+{
+  Front_Distance = checkdistance();     // Get the front distance measurement
+  
+  if ((Front_Distance < 20) && (Front_Distance > 0)) {  // Check if an obstacle is close in front
+    stopp();                              // Stop the vehicle
+    delay(100);
+
+    myservo.write(180);                   // Check distance to the left
+    delay(500);
+    Left_Distance = checkdistance();
+    delay(100);
+
+    myservo.write(0);                     // Check distance to the right
+    delay(500);
+    Right_Distance = checkdistance();
+    delay(100);
+
+    // Decide to turn left or right based on distance measurements
+    if (Left_Distance > Right_Distance) {
+      rotate_left(150);                   // Turn left if left distance is greater
+      myservo.write(90);
+      delay(300);
+    } else {
+      rotate_right(150);                  // Turn right otherwise
+      myservo.write(90);
+      delay(300);
+    }
+  } else {
+    go_forward(100);                      // Go forward if no obstacle is detected
+  }
+}
 
 
 ---------------------------- Today's Start
@@ -204,27 +194,6 @@ volatile int Right_Distance;
 volatile int Right_IR_Value;
 volatile int Left_IR_Value;
 
-// Function to calculate the distance using the ultrasonic sensor
-float checkdistance() {
-  digitalWrite(Trig_Pin, LOW);          // Send a short low pulse to ensure clean signal start
-  delayMicroseconds(2);
-  digitalWrite(Trig_Pin, HIGH);         // Trigger a high pulse for 10 microseconds
-  delayMicroseconds(10);
-  digitalWrite(Trig_Pin, LOW);
-
-  float distance = pulseIn(Echo_Pin, HIGH) / 58.00;  // Calculate distance in cm
-  delay(10);
-  return distance;
-}
-
-// Function to detect left and right distances
-
-
-// Function for ultrasonic obstacle avoidance
-void Obstacle_Avoidance() {
- 
-}
-
 // Setup function
 void setup() {
   myservo.attach(A2);                    // Attach servo to A2
@@ -250,9 +219,23 @@ void setup() {
   pinMode(Rpwm_pin, OUTPUT);             // Right motor speed control (PWM)
 }
 
-// Main loop function
-void loop() {
-  Obstacle_Avoidance();             // Continuously check and avoid obstacles
+// Function to calculate the distance using the ultrasonic sensor
+float checkdistance() {
+  digitalWrite(Trig_Pin, LOW);          // Send a short low pulse to ensure clean signal start
+  delayMicroseconds(2);
+  digitalWrite(Trig_Pin, HIGH);         // Trigger a high pulse for 10 microseconds
+  delayMicroseconds(10);
+  digitalWrite(Trig_Pin, LOW);
+
+  float distance = pulseIn(Echo_Pin, HIGH) / 58.00;  // Calculate distance in cm
+  delay(10);
+  return distance;
+}
+
+// Function to detect left and right distances
+void Detect_Left_and_Right_distance() 
+{
+  // We will write this today!
 }
 
 // Function to move forward at specified speed
@@ -266,15 +249,42 @@ void go_forward(unsigned char speed_val) {
 }
 
 // Function to move backward at specified speed
-
-
-// Function to rotate left at specified speed
-
-
-// Function to rotate right at specified speed
-
+void go_backward(unsigned char speed_val) {
+  digitalWrite(pinRB, LOW);
+  digitalWrite(pinRF, HIGH);
+  digitalWrite(pinLB, LOW);
+  digitalWrite(pinLF, HIGH);
+  analogWrite(Lpwm_pin, speed_val);      // Set left motor speed
+  analogWrite(Rpwm_pin, speed_val);      // Set right motor speed
+}
 
 // Function to stop all motor movement
+void stop() {
+  digitalWrite(pinRB, HIGH);
+  digitalWrite(pinRF, HIGH);
+  digitalWrite(pinLB, HIGH);
+  digitalWrite(pinLF, HIGH);
+}
+
+// Function to rotate left at specified speed
+void rotate_left(unsigned char speed_val) 
+{
+  //Write me!
+}
+
+// Function to rotate right at specified speed
+void rotate_right(unsigned char speed_val) 
+{
+   //Write me!
+}
 
 
 
+// Function for ultrasonic obstacle avoidance
+void loop 
+{
+  go_forward(100);
+  delay(300);
+  go_backward(500);
+  stop();
+}
