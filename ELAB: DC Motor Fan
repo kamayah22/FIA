@@ -1,0 +1,33 @@
+// Define pin connections
+const int motorIn1 = 8; // IN1 on the L2298N
+const int motorIn2 = 9; // IN2 on the L2298N
+const int enablePin = 3; // ENA on the L298N for speed control
+
+void setup() {
+//set motor control pins as outputs
+pinMode(motorIn1, OUTPUT);
+pinMode(motorIn2, OUTPUT);
+pinMode(enablePin, OUTPUT);
+}
+
+void loop() {
+// Set the motor to move in a forward direction
+digitalWrite(motorIn1, HIGH); // Set IN1 to HIGH
+digitalWrite(motorIn2, LOW); // Set IN2 to LOW
+analogWrite(enablePin, 150); // Set speed using PWM signal (range 0-255)
+delay(2000); // continues this state for 2000 milliseconds or 2 seconds
+
+// Stop the motor
+digitalWrite(enablePin, LOW); // Disable the ENA pin to stop the motor
+delay(1000); // Pause for 1000 milliseconds or 1 second
+
+// Set the motor to move in reverse direction (aka reverse polarity)
+digitalWrite(motorIn1, LOW); // Set IN1 to HIGH
+digitalWrite(motorIn2, HIGH); // Set IN2 to LOW
+analogWrite(enablePin, 150); // Set speed using PWM signal (range 0-255)
+delay(2000); // continues this state for 2000 milliseconds or 2 seconds
+
+// Stop the motor
+digitalWrite(enablePin, LOW); // Disable the ENA pin to stop the motor
+delay(1000); // Pause for 1000 milliseconds or 1 second
+}
