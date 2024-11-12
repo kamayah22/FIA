@@ -25,7 +25,8 @@ volatile int Right_IR_Value;
 volatile int Left_IR_Value;
 
 // Setup function
-void setup() {
+void setup() 
+{
   myservo.attach(A2);                    // Attach servo to A2
   Serial.begin(9600);                    // Initialize serial communication for debugging
 
@@ -50,7 +51,8 @@ void setup() {
 }
 
 // Function to calculate the distance using the ultrasonic sensor
-float checkdistance() {
+float checkdistance() 
+{
   digitalWrite(Trig_Pin, LOW);          // Send a short low pulse to ensure clean signal start
   delayMicroseconds(2);
   digitalWrite(Trig_Pin, HIGH);         // Trigger a high pulse for 10 microseconds
@@ -63,22 +65,24 @@ float checkdistance() {
 }
 
 // Function to detect left and right distances
-void Detect_Left_and_Right_distance() {
-  myservo.write(180);                   // Rotate servo to left position
-  delay(400);
-  Left_Distance = checkdistance();      // Measure left distance
-  delay(600);
-  Serial.print("Left_Distance: ");
-  Serial.println(Left_Distance);
+void Detect_Left_and_Right_distance() 
+{
+   myservo.write(180);
+  delay(100);
+  Left_Distance = checkdistance();
+  delay(1000);
+  Serial.print("To the left..: ");
+  Serial.println(Left_Distance); 
 
-  myservo.write(0);                     // Rotate servo to right position
-  delay(400);
-  Right_Distance = checkdistance();     // Measure right distance
-  delay(600);
-  Serial.print("Right_Distance: ");
-  Serial.println(Right_Distance);
+  myservo.write(0);
+  delay(100);
+  Right_Distance = checkdistance();
+  delay(1000);
+  Serial.print("To the right..: ");
+  Serial.println(Right_Distance);   
 
-  myservo.write(90);                    // Return servo to forward position
+  myservo.write(90);
+  delay(1000);
 }
 
 
@@ -94,7 +98,8 @@ void go_forward(unsigned char speed_val) {
 }
 
 // Function to move backward at specified speed
-void go_backward(unsigned char speed_val) {
+void go_backward(unsigned char speed_val) 
+{
   digitalWrite(pinRB, LOW);
   digitalWrite(pinRF, HIGH);
   digitalWrite(pinLB, LOW);
@@ -104,7 +109,8 @@ void go_backward(unsigned char speed_val) {
 }
 
 // Function to rotate left at specified speed
-void rotate_left(unsigned char speed_val) {
+void rotate_left(unsigned char speed_val) 
+{
   digitalWrite(pinRB, HIGH);
   digitalWrite(pinRF, LOW);
   digitalWrite(pinLB, LOW);
@@ -114,7 +120,8 @@ void rotate_left(unsigned char speed_val) {
 }
 
 // Function to rotate right at specified speed
-void rotate_right(unsigned char speed_val) {
+void rotate_right(unsigned char speed_val) 
+{
   digitalWrite(pinRB, LOW);
   digitalWrite(pinRF, HIGH);
   digitalWrite(pinLB, HIGH);
@@ -124,7 +131,8 @@ void rotate_right(unsigned char speed_val) {
 }
 
 // Function to stop all motor movement
-void stopp() {
+void stopp() 
+{
   digitalWrite(pinRB, HIGH);
   digitalWrite(pinRF, HIGH);
   digitalWrite(pinLB, HIGH);
@@ -132,7 +140,7 @@ void stopp() {
 }
 
 // Function for ultrasonic obstacle avoidance
-void loop 
+void loop()
 {
   Front_Distance = checkdistance();     // Get the front distance measurement
   
@@ -151,19 +159,24 @@ void loop
     delay(100);
 
     // Decide to turn left or right based on distance measurements
-    if (Left_Distance > Right_Distance) {
+    if (Left_Distance > Right_Distance) 
+    {
       rotate_left(150);                   // Turn left if left distance is greater
       myservo.write(90);
       delay(300);
-    } else {
+    } 
+    else 
+    {
       rotate_right(150);                  // Turn right otherwise
       myservo.write(90);
       delay(300);
     }
-  } else {
-    go_forward(100);                      // Go forward if no obstacle is detected
+    }
+    else 
+    {
+      go_forward(100);                      // Go forward if no obstacle is detected
+    }
   }
-}
 
 
 ---------------------------- Today's Start
