@@ -1,0 +1,72 @@
+#include <Servo.h>
+
+// Define pins
+const int trigPin = 9;
+const int echoPin = 10;
+Servo myServo;
+
+// Define distances for triggering
+const int triggerDistance = 10; // in centimeters
+
+void setup() 
+{
+  // Initialize pins
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+
+  // Attach servo
+  myServo.attach(6); // Attach servo to pin 6
+  myServo.write(0); // Start at 0 degrees
+
+  // Serial monitor for debugging (optional)
+  Serial.begin(9600);
+}
+
+void loop() 
+{
+  // Measure distance
+  long duration = measureDistance();
+  int distance = duration * 0.034 / 2;
+
+  // Debugging: Print distance to Serial Monitor
+  Serial.println(distance);
+
+  // Trigger action if distance is below the threshold
+  if (distance <= triggerDistance) {
+    moveServo();
+  }
+
+  delay(100); // Delay for stability
+}
+
+long measureDistance() 
+{
+  // Send a pulse
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Read echo
+  return pulseIn(echoPin, HIGH);
+}
+
+void moveServo() 
+{
+  // Move servo to 45 degrees over 1 second
+  for (int pos = 0; pos <= 45; pos++) 
+  {
+    myServo.write(pos);
+    delay(22); // Approx. 22ms per degree for smooth motion
+  }
+
+  delay(1000); // Wait for 1 second at 45 degrees
+
+  // Move servo back to 0 degrees over 1 second
+  for (int pos = 45; pos >= 0; pos--) 
+  {
+    myServo.write(pos);
+    delay(22);
+  }
+}
