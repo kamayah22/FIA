@@ -1,0 +1,76 @@
+//******************
+// These are lines from Ultra Obby Avoidance that will be programmed and saved today, Feb 24
+//******************
+
+// Servo Setup
+#include <Servo.h>  // Include the Servo library
+Servo myservo;      // Create a servo object to control a servo motor
+
+// Pin definitions for ultrasonic sensor
+const int trigPin = 3;  // Trigger pin for ultrasonic sensor
+const int echoPin = 2;  // Echo pin for ultrasonic sensor
+const int ledPin = 13;  // Built-in LED on pin 13
+
+// Distance threshold in centimeters
+const int distanceThreshold = 20;
+
+// Setup function
+void setup() 
+{
+  myservo.attach(A2);                // Attach servo to A2
+  Serial.begin(9600);                // Initialize serial communication for debugging
+
+  // Configure pins for ultrasonic sensor and LED
+  pinMode(echoPin, INPUT);
+  pinMode(trigPin, OUTPUT);
+  pinMode(ledPin, OUTPUT);           // Built-in LED on pin 13
+}
+
+float checkDistance() 
+{
+  digitalWrite(trigPin, LOW);         // Send a short low pulse to ensure clean signal start
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);        // Trigger a high pulse for 10 microseconds
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  float distance = pulseIn(echoPin, HIGH) / 58.00;  // Calculate distance in cm
+  return distance;
+}
+
+
+// The loop function is no longer part of Ultra Obby, Next week we will debug the correct code and hand code drivign motor functions. Some students can break off for a soldering lesson if students finish early. 
+void loop() 
+{
+  for (int pos = 0; pos <= 180; pos += 10)  // Sweep servo from 0 to 180 degrees
+  {
+    myservo.write(pos);
+    delay(100);
+    float distance = checkDistance();
+    
+    if (distance < distanceThreshold) 
+    {
+      digitalWrite(ledPin, HIGH);  // Turn on built-in LED if object is too close
+    } 
+    else 
+    {
+      digitalWrite(ledPin, LOW);   // Turn off built-in LED otherwise
+    }
+  }
+
+  for (int pos = 180; pos >= 0; pos -= 10)  // Sweep servo back from 180 to 0 degrees
+  {
+    myservo.write(pos);
+    delay(100);
+    float distance = checkDistance();
+    
+    if (distance < distanceThreshold) 
+    {
+      digitalWrite(ledPin, HIGH);
+    } 
+    else 
+    {
+      digitalWrite(ledPin, LOW);
+    }
+  }
+}
