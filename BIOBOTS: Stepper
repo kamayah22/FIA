@@ -1,0 +1,65 @@
+/**
+  Experiment: Controlling A Stepper Motor With Your Muscles
+This code converts your EMG signal into pulses that drive the motor. More muscle activity means more pulses, so the motor spins further.
+**/
+
+#include <AccelStepper.h>  // Include AccelStepper library
+
+#define DIR 7                   // DIR pin from A4988 to pin 7
+
+#define STEP 4                  // STEP pin from A4988 to pin 4
+
+#define MOTOR_INTERFACE_TYPE 1  // How many motors are connected (max = 4)
+
+AccelStepper stepper(MOTOR_INTERFACE_TYPE, STEP, DIR);
+
+#define MAX 60
+
+#define MAX_STEPS 10
+
+int readings[10];
+int finalReading;
+byte multiplier = 1;
+byte numSteps = 0;
+int currentSteps = 0;
+
+void setup() {
+  Serial.begin(9600);
+  stepper.setMaxSpeed(500);
+}
+
+void loop() {
+  // Take 10 readings
+  for (int i = 0; i < 10; i++) {
+    readings[i] = analogRead(A0) * multiplier;
+    delay(2);
+  }
+
+  // Average the 10 readings
+  finalReading = 0;
+  for (int i = 0; i < 10; i++) {
+    finalReading += readings[i];
+  }
+  finalReading /= 10;
+
+  finalReading = constrain(finalReading, 0, MAX);
+  numSteps = map(finalReading, 0, MAX, 0, MAX_STEPS);
+
+  // If there's enough activity
+  if (numSteps >= 10) {
+    stepper.setSpeed(1000);
+    stepper.runSpeed();
+  } else {
+    for (currentSteps = 0; currentSteps <= numSteps; currentSteps++) {
+      Serial.print("Current Steps: ");
+      Serial.print(currentSteps);
+      Serial.print("   Final Reading: ");
+      Serial.print(finalReading);
+      Serial.print("   Steps Advanced: ");
+      Serial.println(numSteps);
+      stepper.stop();
+      delay(50);
+    }
+  }
+  delay(10);
+}
