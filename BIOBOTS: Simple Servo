@@ -1,0 +1,29 @@
+/*
+ * Simple Servo Motor Control
+ * Controls a servo motor based on an analog input (EMG signal or potentiometer)
+ */
+
+#include <Servo.h>
+
+#define SERVO_PIN 2       // Pin connected to the servo motor
+#define SENSOR_PIN A0      // Analog input for signal (EMG or potentiometer)
+#define MIN_ANGLE 105      // Minimum servo angle
+#define MAX_ANGLE 190      // Maximum servo angle
+#define UPDATE_INTERVAL 100 // Servo update interval in milliseconds
+
+Servo Gripper;            // Servo object
+unsigned long lastUpdate = 0; // Timer for updating servo position
+
+void setup() {
+    Gripper.attach(SERVO_PIN); // Attach servo to pin
+}
+
+void loop() {
+    if (millis() - lastUpdate > UPDATE_INTERVAL) { // Check if it's time to update
+        int sensorValue = analogRead(SENSOR_PIN);  // Read sensor input
+        int angle = map(sensorValue, 40, 1000, MAX_ANGLE, MIN_ANGLE); // Map input to angle
+        angle = constrain(angle, MIN_ANGLE, MAX_ANGLE); // Keep angle within range
+        Gripper.write(angle); // Move servo
+        lastUpdate = millis(); // Reset timer
+    }
+}
