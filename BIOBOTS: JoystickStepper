@@ -1,0 +1,49 @@
+/*28BYJ-48 Stepper Motor to ULN2003 Driver
+
+IN1 → Arduino 8
+IN2 → Arduino 9
+IN3 → Arduino 10
+IN4 → Arduino 11
+VCC → 5V
+GND → GND
+
+Joystick Module
+
+VCC → 5V
+GND → GND
+VRX → A0 (Joystick X-axis for speed control)
+VRY → A1 (Joystick Y-axis for direction control) */
+
+#include <Stepper.h>
+
+// Define steps per revolution for 28BYJ-48
+#define STEPS_PER_REV 2048
+
+// Initialize stepper motor (ULN2003 driver)
+Stepper stepper(STEPS_PER_REV, 8, 10, 9, 11);
+
+// Joystick pins
+#define JOY_X A0  // X-axis (Speed)
+#define JOY_Y A1  // Y-axis (Direction)
+
+void setup() {
+    stepper.setSpeed(10);  // Initial speed (RPM)
+    pinMode(JOY_X, INPUT);
+    pinMode(JOY_Y, INPUT);
+}
+
+void loop() {
+    int xValue = analogRead(JOY_X);  // Read speed
+    int yValue = analogRead(JOY_Y);  // Read direction
+
+    // Map joystick X-axis to stepper speed (0 to 1023 → 0 to 15 RPM)
+    int speed = map(xValue, 0, 1023, 1, 15);
+    stepper.setSpeed(speed);
+
+    // Determine direction based on Y-axis input
+    if (yValue > 600) {
+        stepper.step(10);  // Move forward
+    } else if (yValue < 400) {
+        stepper.step(-10); // Move backward
+    }
+}
