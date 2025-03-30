@@ -1,0 +1,105 @@
+#include <Servo.h>  // Include the built-in Servo library
+
+// Define pins for the ultrasonic sensor
+const int trigPin = 7;
+const int echoPin = 6;
+
+// Define the servo objects
+Servo servo1;
+Servo servo2;
+
+// Define pins for the servos
+const int servoPin1 = 9;
+const int servoPin2 = 10;
+
+// Define your trigger distance in centimeters
+const int triggerDistance = 15;
+
+// Variable for servo position
+int servoPosition = 0;
+
+void setup() 
+{
+  // Initialize serial communication (for debugging if needed)
+  Serial.begin(9600);
+  // Attach the servo pins to the servo objects
+  servo1.attach(servoPin1);
+  servo2.attach(servoPin2);
+  // Set the ultrasonic sensor pins as output/input
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  // Optionally, set servos to an initial position
+  servo1.write(0);
+  servo2.write(0);
+  // Small delay to let things settle
+  delay(1000);
+}
+void loop() 
+{
+  // Measure the distance from the ultrasonic sensor
+  long distance = getDistance();
+
+  // Print distance to Serial Monitor (optional debugging)
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  // Check if the distance is within or equal to triggerDistance
+  if (distance <= triggerDistance) 
+  {
+    // While an object is within 15 cm, move servos back and forth
+    // We re-check distance after each sweep to see if object is still there.
+    while (distance <= triggerDistance) 
+    {
+      // Sweep from 0 to 90
+      for (servoPosition = 0; servoPosition <= 90; servoPosition++) 
+      {
+        servo1.write(servoPosition);
+        delay(4);
+      }
+      for (servoPosition = 0; servoPosition <= 90; servoPosition++) 
+      {
+        servo2.write(servoPosition);
+        delay(4); // Speed of servo movement
+      }
+      // Sweep from 90 back to 0
+      for (servoPosition = 90; servoPosition >= 0; servoPosition--) 
+      {
+        servo1.write(servoPosition);
+        delay(4);
+      }
+      for (servoPosition = 90; servoPosition >= 0; servoPosition--) 
+      {
+        servo2.write(servoPosition);
+        delay(4);
+      }
+      // Update distance reading to decide if we keep sweeping
+      distance = getDistance();
+    }
+  }
+  // If distance is more than 15 cm, do nothing special,
+  // just wait briefly before taking next measurement
+  delay(200);
+}
+
+// Function to get distance from the HC-SR04 sensor
+long getDistance() 
+{
+  // Clear the trigPin
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+
+  // Send a 10 microsecond HIGH pulse to trigger the sensor
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Read the echoPin. pulseIn() returns the duration (in microseconds) of the echo.
+  long duration = pulseIn(echoPin, HIGH);
+
+  // Calculate the distance in centimeters:
+  // Speed of sound is ~340 m/s or 29.1 µs per cm round trip.
+  // The formula for centimeters: distance = duration / 29 / 2
+  long distanceCm = duration / 29 / 2;
+  return distanceCm;
+}
