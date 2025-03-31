@@ -2,6 +2,9 @@
 int RECV_PIN = 12;
 IRrecv irrecv(RECV_PIN);
 decode_results results;
+
+//THESE CODES ARE FORE IRemote Library 3.7.1 !!!!
+
 #define IR_Go      0x00ff629d
 #define IR_Back    0x00ffa857
 #define IR_Left    0x00ff22dd
