@@ -41,6 +41,8 @@ void loop()
     digitalWrite(leds[j], LOW);
   }
 
+//DAMI LEFT OFF HERE
+
   Serial.print(finalReading);      //Display the averaged reading
   Serial.print("\t");
 
