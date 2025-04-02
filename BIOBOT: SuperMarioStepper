@@ -1,0 +1,22 @@
+#include <Stepper.h>
+
+#define STEPS 2048  // Adjust according to your stepper motor specs
+#define BUTTON_CW 4 // Button for clockwise rotation
+#define BUTTON_CCW 5 // Button for counterclockwise rotation
+
+Stepper stepper(STEPS, 9, 10, 11, 12);
+
+void setup() {
+    pinMode(BUTTON_CW, INPUT_PULLUP);  // Set button pins as input with internal pull-up resistors
+    pinMode(BUTTON_CCW, INPUT_PULLUP);
+    stepper.setSpeed(10); // Adjust speed as needed
+}
+
+void loop() {
+    if (digitalRead(BUTTON_CW) == LOW) {
+        stepper.step(10); // Move 10 steps CW
+    }
+    if (digitalRead(BUTTON_CCW) == LOW) {
+        stepper.step(-10); // Move 10 steps CCW
+    }
+}
