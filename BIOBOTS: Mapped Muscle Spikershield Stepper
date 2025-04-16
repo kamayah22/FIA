@@ -1,0 +1,83 @@
+#include <AccelStepper.h>  // Include AccelStepper library
+
+
+#define IN1 7
+#define IN2 6
+#define IN3 5
+#define IN4 4
+
+
+#define MOTOR_INTERFACE_TYPE 4  // 4-pin stepper motor (ULN2003)
+
+
+AccelStepper stepper(MOTOR_INTERFACE_TYPE, IN1, IN2, IN3, IN4);
+
+
+#define MAX 60          // Max flex value
+#define MIN_SPEED 100   // Minimum speed (steps/sec)
+#define MAX_SPEED 600   // Maximum speed (steps/sec)
+#define FLEX_THRESHOLD 10  // Minimum flex to activate motor
+
+
+int readings[10];
+int finalReading;
+byte multiplier = 1;
+
+
+void setup() {
+  Serial.begin(9600);
+  stepper.setMaxSpeed(MAX_SPEED);
+  stepper.setAcceleration(200);  // Smooth acceleration
+}
+
+
+void loop() {
+  // Take 10 readings
+  for (int i = 0; i < 10; i++) {
+    readings[i] = analogRead(A0) * multiplier;
+    delay(2);
+  }
+
+
+  // Average the 10 readings
+  finalReading = 0;
+  for (int i = 0; i < 10; i++) {
+    finalReading += readings[i];
+  }
+  finalReading /= 10;
+
+
+  // Constrain the reading and map it to speed
+  finalReading = constrain(finalReading, 0, MAX);
+  int motorSpeed = map(finalReading, 0, MAX, MIN_SPEED, MAX_SPEED);
+
+
+  Serial.print("Flex Value: ");
+  Serial.print(finalReading);
+  Serial.print(" | Motor Speed: ");
+  Serial.println(motorSpeed);
+
+
+  // If muscle flex is strong enough, adjust speed and run motor
+  if (finalReading >= FLEX_THRESHOLD) {
+    stepper.setSpeed(motorSpeed);
+    stepper.runSpeed();  // Continuous movement based on flex
+  } else {
+    stepper.setSpeed(0);  // Stop motor when flex is too low
+  }
+
+
+  delay(10);
+}
+
+
+// How It Works
+// Reads muscle flex (A0) and averages 10 readings for smoothness.
+// Maps flex intensity to motor speed (100 to 600 steps/sec).
+// Motor spins faster when flexing harder.
+// Stops spinning if flex is below a certain threshold.
+
+// Try This Next
+// If the motor moves too slowly, increase MAX_SPEED (try 800).
+// If it doesn't stop properly, increase FLEX_THRESHOLD to filter weak signals.
+// If movement is jerky, increase setAcceleration(200); to 300 or 400.
