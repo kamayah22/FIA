@@ -1,0 +1,83 @@
+//Code for Basic Stepper Signal Reception from EMG …start with this upload and its connections
+
+#include <AccelStepper.h>  // Include AccelStepper library
+
+
+#define IN1 7
+#define IN2 6
+#define IN3 5
+#define IN4 4
+
+
+#define MOTOR_INTERFACE_TYPE 4  // 4-pin stepper motor (ULN2003)
+
+
+AccelStepper stepper(MOTOR_INTERFACE_TYPE, IN1, IN2, IN3, IN4);
+
+
+#define MAX 60
+#define MAX_STEPS 10
+
+
+int readings[10];
+int finalReading;
+byte multiplier = 1;
+byte numSteps = 0;
+int currentSteps = 0;
+
+
+void setup() {
+  Serial.begin(9600);
+  stepper.setMaxSpeed(500);
+  stepper.setAcceleration(100);
+}
+
+
+void loop() {
+  // Take 10 readings
+  for (int i = 0; i < 10; i++) {
+    readings[i] = analogRead(A0) * multiplier;
+    delay(2);
+  }
+
+
+  // Average the 10 readings
+  finalReading = 0;
+  for (int i = 0; i < 10; i++) {
+    finalReading += readings[i];
+  }
+  finalReading /= 10;
+
+
+  finalReading = constrain(finalReading, 0, MAX);
+  numSteps = map(finalReading, 0, MAX, 0, MAX_STEPS);
+
+
+  // If there's enough activity
+  if (numSteps >= 10) {
+    stepper.move(200); // Move a full revolution (adjust for your motor)
+    stepper.runToPosition();
+  } else {
+    for (currentSteps = 0; currentSteps <= numSteps; currentSteps++) {
+      Serial.print("Current Steps: ");
+      Serial.print(currentSteps);
+      Serial.print("   Final Reading: ");
+      Serial.print(finalReading);
+      Serial.print("   Steps Advanced: ");
+      Serial.println(numSteps);
+      stepper.stop();
+      delay(50);
+    }
+  }
+  delay(10);
+}
+
+
+
+
+//Connections: 
+//IN1 to 7 for Step Control  [ ULN2003 Stepper Motor Driver ]
+//IN2 to 6 for Step Control
+//IN3 to 5 for Step Control
+//IN4 to 4 for Step Control
+//VCC to 5V and GND to GND for Power
