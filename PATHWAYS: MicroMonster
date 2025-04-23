@@ -103,3 +103,41 @@ long getDistance()
   long distanceCm = duration / 29 / 2;
   return distanceCm;
 }
+
+
+
+
+
+
+
+//New if loop to try
+
+while (getDistance() <= triggerDistance) 
+{
+  // Sweep from 0 to 90
+  for (servoPosition = 0; servoPosition <= 90; servoPosition++) 
+  {
+    servo1.write(servoPosition);
+    if (getDistance() > triggerDistance) break;
+    delay(4);
+  }
+  for (servoPosition = 0; servoPosition <= 90; servoPosition++) 
+  {
+    servo2.write(servoPosition);
+    if (getDistance() > triggerDistance) break;
+    delay(4);
+  }
+  // Sweep from 90 back to 0
+  for (servoPosition = 90; servoPosition >= 0; servoPosition--) 
+  {
+    servo1.write(servoPosition);
+    if (getDistance() > triggerDistance) break;
+    delay(4);
+  }
+  for (servoPosition = 90; servoPosition >= 0; servoPosition--) 
+  {
+    servo2.write(servoPosition);
+    if (getDistance() > triggerDistance) break;
+    delay(4);
+  }
+}
