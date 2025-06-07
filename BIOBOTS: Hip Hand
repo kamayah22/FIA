@@ -1,0 +1,66 @@
+#include <Arduino.h>
+#include <Servo.h>
+
+// Pins for servo motors
+const int shoulderPin = 9;
+const int elbowPin = 10;
+const int gripperPin = 11;
+
+// Servo motors
+Servo shoulder;
+Servo elbow;
+Servo gripper;
+
+// Current angles
+int shoulderAngle = 97;
+int elbowAngle = 90;
+int gripperAngle = 160;
+
+void setup() {
+  Serial.begin(9600);
+
+  shoulder.attach(shoulderPin);
+  elbow.attach(elbowPin);
+  gripper.attach(gripperPin);
+
+  shoulder.write(shoulderAngle);
+  elbow.write(elbowAngle);
+  gripper.write(gripperAngle);
+}
+
+void loop() {
+  // Wait for input from Serial
+  if (Serial.available() >= 9) {
+    String input = Serial.readStringUntil('\n');
+    input.trim();
+
+    if (input.length() == 9) {
+      int newShoulder = input.substring(0, 3).toInt();
+      int newElbow = input.substring(3, 6).toInt();
+      int newGripper = input.substring(6, 9).toInt();
+
+      moveJoint(shoulder, shoulderAngle, newShoulder);
+      moveJoint(elbow, elbowAngle, newElbow);
+      moveJoint(gripper, gripperAngle, newGripper);
+
+      // Update current angles
+      shoulderAngle = newShoulder;
+      elbowAngle = newElbow;
+      gripperAngle = newGripper;
+
+      Serial.println("✅ Moved all joints!");
+    } else {
+      Serial.println("❌ Wrong input! Use 9 digits like 090045160");
+    }
+  }
+}
+
+// Move one servo motor smoothly
+void moveJoint(Servo motor, int current, int target) {
+  while (current != target) {
+    if (current < target) current++;
+    else current--;
+    motor.write(current);
+    delay(15);
+  }
+}
