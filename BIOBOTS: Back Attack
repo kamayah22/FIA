@@ -1,0 +1,121 @@
+#include <Arduino.h>
+#include <Servo.h>
+
+// Servo pins
+const int shoulder1Pin = 9;
+const int elbow1Pin = 10;
+const int gripper1Pin = 11;
+
+const int shoulder2Pin = 5;
+const int elbow2Pin = 4;
+const int gripper2Pin = 3;
+
+// Ultrasonic sensor (shared for both grippers)
+const int triggerPin = 6;
+const int echoPin = 7;
+const int distanceThreshold = 15; // cm
+
+// Debounce timer
+unsigned long lastToggleTime = 0;
+bool grippersClosed = false;
+
+// Servo objects
+Servo shoulder1, elbow1, gripper1;
+Servo shoulder2, elbow2, gripper2;
+
+// Current angles
+int shoulder1Angle = 97;
+int elbow1Angle = 90;
+
+int shoulder2Angle = 97;
+int elbow2Angle = 90;
+
+void setup() {
+  Serial.begin(9600);
+
+  // Attach servos
+  shoulder1.attach(shoulder1Pin);
+  elbow1.attach(elbow1Pin);
+  gripper1.attach(gripper1Pin);
+
+  shoulder2.attach(shoulder2Pin);
+  elbow2.attach(elbow2Pin);
+  gripper2.attach(gripper2Pin);
+
+  // Setup ultrasonic sensor pins
+  pinMode(triggerPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+
+  // Initialize servos
+  shoulder1.write(shoulder1Angle);
+  elbow1.write(elbow1Angle);
+  gripper1.write(grippersClosed ? 40 : 160);
+
+  shoulder2.write(shoulder2Angle);
+  elbow2.write(elbow2Angle);
+  gripper2.write(grippersClosed ? 40 : 160);
+}
+
+void loop() {
+  // Serial input for shoulder & elbow (12 digits total)
+  if (Serial.available() >= 12) {
+    String input = Serial.readStringUntil('\n');
+    input.trim();
+
+    if (input.length() == 12) {
+      int newShoulder1 = input.substring(0, 3).toInt();
+      int newElbow1 = input.substring(3, 6).toInt();
+      int newShoulder2 = input.substring(6, 9).toInt();
+      int newElbow2 = input.substring(9, 12).toInt();
+
+      moveJoint(shoulder1, shoulder1Angle, newShoulder1);
+      moveJoint(elbow1, elbow1Angle, newElbow1);
+      moveJoint(shoulder2, shoulder2Angle, newShoulder2);
+      moveJoint(elbow2, elbow2Angle, newElbow2);
+
+      shoulder1Angle = newShoulder1;
+      elbow1Angle = newElbow1;
+      shoulder2Angle = newShoulder2;
+      elbow2Angle = newElbow2;
+
+      Serial.println("✅ Moved shoulders & elbows!");
+    } else {
+      Serial.println("❌ Wrong input! Use 12 digits like 090045120075");
+    }
+  }
+
+  // Read distance sensor and toggle grippers if close
+  float distance = readDistance(triggerPin, echoPin);
+
+  if (distance > 0 && distance < distanceThreshold && millis() - lastToggleTime > 1000) {
+    grippersClosed = !grippersClosed;
+    gripper1.write(grippersClosed ? 40 : 160);
+    gripper2.write(grippersClosed ? 40 : 160);
+    lastToggleTime = millis();
+
+    Serial.print("🔁 Grippers toggled to ");
+    Serial.println(grippersClosed ? "CLOSED" : "OPEN");
+  }
+}
+
+// Smooth movement function
+void moveJoint(Servo motor, int current, int target) {
+  while (current != target) {
+    current += (current < target) ? 1 : -1;
+    motor.write(current);
+    delay(15);
+  }
+}
+
+// Get distance in cm from ultrasonic sensor
+float readDistance(int trigPin, int echoPin) {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH, 30000); // Timeout: 30ms
+  return duration > 0 ? (duration * 0.0343) / 2 : -1;
+}
+
