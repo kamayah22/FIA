@@ -1,0 +1,111 @@
+#include <Arduino.h>
+#include <Servo.h>
+
+// Servo pins
+const int shoulder1Pin = 9;
+const int elbow1Pin = 10;
+const int gripper1Pin = 11;
+
+const int shoulder2Pin = 5;
+const int elbow2Pin = 4;
+const int gripper2Pin = 3;
+
+// Joystick analog pins
+const int joy1Y = A0; // Shoulder 1
+const int joy1X = A1; // Elbow 1
+const int joy2Y = A2; // Shoulder 2
+const int joy2X = A3; // Elbow 2
+
+// Joystick buttons (digital pins)
+const int button1Pin = 2; // Gripper 1 toggle
+const int button2Pin = 8; // Gripper 2 toggle
+
+// Servo objects
+Servo shoulder1, elbow1, gripper1;
+Servo shoulder2, elbow2, gripper2;
+
+// Joint angles
+int shoulder1Angle = 97;
+int elbow1Angle = 90;
+int shoulder2Angle = 97;
+int elbow2Angle = 90;
+
+// Gripper state
+bool gripper1Closed = false;
+bool gripper2Closed = false;
+
+// Debounce tracking
+bool lastButton1State = HIGH;
+bool lastButton2State = HIGH;
+unsigned long lastToggleTime1 = 0;
+unsigned long lastToggleTime2 = 0;
+
+void setup() {
+  Serial.begin(9600);
+
+  // Attach servos
+  shoulder1.attach(shoulder1Pin);
+  elbow1.attach(elbow1Pin);
+  gripper1.attach(gripper1Pin);
+
+  shoulder2.attach(shoulder2Pin);
+  elbow2.attach(elbow2Pin);
+  gripper2.attach(gripper2Pin);
+
+  // Button inputs
+  pinMode(button1Pin, INPUT_PULLUP);
+  pinMode(button2Pin, INPUT_PULLUP);
+
+  // Initialize servos
+  shoulder1.write(shoulder1Angle);
+  elbow1.write(elbow1Angle);
+  gripper1.write(gripper1Closed ? 40 : 160);
+
+  shoulder2.write(shoulder2Angle);
+  elbow2.write(elbow2Angle);
+  gripper2.write(gripper2Closed ? 40 : 160);
+}
+
+void loop() {
+  // === JOYSTICK SERVO MOVEMENT ===
+  shoulder1Angle = mapJoystick(analogRead(joy1Y));
+
+  elbow1Angle = mapJoystick(analogRead(joy1X));
+  shoulder2Angle = mapJoystick(analogRead(joy2Y));
+  elbow2Angle = mapJoystick(analogRead(joy2X));
+
+  shoulder1.write(shoulder1Angle);
+  elbow1.write(elbow1Angle);
+  shoulder2.write(shoulder2Angle);
+  elbow2.write(elbow2Angle);
+
+  // === BUTTON PRESS FOR GRIPPER TOGGLE ===
+  bool button1State = digitalRead(button1Pin);
+  bool button2State = digitalRead(button2Pin);
+
+  // Gripper 1 toggle
+  if (button1State == LOW && lastButton1State == HIGH && millis() - lastToggleTime1 > 300) {
+    gripper1Closed = !gripper1Closed;
+    gripper1.write(gripper1Closed ? 40 : 160);
+    Serial.println(gripper1Closed ? "🤖 Gripper 1 CLOSED" : "🤖 Gripper 1 OPEN");
+    lastToggleTime1 = millis();
+  }
+  lastButton1State = button1State;
+
+  // Gripper 2 toggle
+  if (button2State == LOW && lastButton2State == HIGH && millis() - lastToggleTime2 > 300) {
+    gripper2Closed = !gripper2Closed;
+    gripper2.write(gripper2Closed ? 40 : 160);
+    Serial.println(gripper2Closed ? "🤖 Gripper 2 CLOSED" : "🤖 Gripper 2 OPEN");
+    lastToggleTime2 = millis();
+  }
+  lastButton2State = button2State;
+
+  delay(50); // Slight delay for smoother movement
+}
+
+// Map analog joystick value to angle
+int mapJoystick(int val) {
+  val = constrain(val, 0, 1023);
+  return map(val, 0, 1023, 0, 180);
+}
