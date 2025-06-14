@@ -1,4 +1,8 @@
-#include <Arduino.h>
+Skip to content
+Chat history
+
+You said:
+get rid of stepper code, change serial input to include a way to toggle gripper pinch (one open and close movement) instead: #include <Arduino.h>
 #include <Servo.h>
 #include <Stepper.h>
 
@@ -92,3 +96,100 @@ void moveBase(int newAngle) {
   digitalWrite(basePin3, LOW);
   digitalWrite(basePin4, LOW);
 }
+ChatGPT said:
+
+Thought for 5 seconds
+Below is a streamlined sketch that drops all Stepper-related parts and adds a simple serial command ― P (or p) ― that makes the gripper “pinch” once (close, pause, reopen).
+Regular position updates for the three servos (shoulder, elbow, gripper) are now sent as 9 digits (3 per joint, e.g., 097090160). Everything else stays familiar.
+
+#include <Arduino.h>
+#include <Servo.h>
+
+// -------------------- Pin map --------------------
+const int shoulderPin = 9;
+const int elbowPin    = 10;
+const int gripperPin  = 11;
+
+// -------------------- Servos ---------------------
+Servo shoulder;
+Servo elbow;
+Servo gripper;
+
+// -------------------- Current states -------------
+int shoulderAngle = 97;
+int elbowAngle    = 90;
+int gripperOpen   = 160;   // fully open
+int gripperClosed =  90;   // pinch
+int gripperAngle  = gripperOpen;
+
+/* ------------------------------------------------
+   Setup
+------------------------------------------------- */
+void setup() {
+  Serial.begin(9600);
+
+  shoulder.attach(shoulderPin);
+  elbow.attach(elbowPin);
+  gripper.attach(gripperPin);
+
+  shoulder.write(shoulderAngle);
+  elbow.write(elbowAngle);
+  gripper.write(gripperAngle);
+}
+
+/* ------------------------------------------------
+   Main loop
+------------------------------------------------- */
+void loop() {
+  if (Serial.available()) {
+    String input = Serial.readStringUntil('\n');
+    input.trim();
+
+    // -------- Pinch command --------
+    if (input.equalsIgnoreCase("P")) {        // ‘P’ or ‘p’
+      pinchOnce();
+      Serial.println("🤏 Pinch complete!");
+      return;
+    }
+
+    // -------- 3-servo position update --------
+    if (input.length() == 9) {                // e.g. "097090160"
+      int newShoulder = input.substring(0, 3).toInt();
+      int newElbow    = input.substring(3, 6).toInt();
+      int newGripper  = input.substring(6, 9).toInt();
+
+      moveJoint(shoulder, shoulderAngle, newShoulder);
+      moveJoint(elbow,    elbowAngle,    newElbow);
+      moveJoint(gripper,  gripperAngle,  newGripper);
+
+      shoulderAngle = newShoulder;
+      elbowAngle    = newElbow;
+      gripperAngle  = newGripper;
+
+      Serial.println("✅ Moved shoulder, elbow, gripper!");
+    } else {
+      Serial.println("❌ Wrong input! Use 9 digits (e.g. 097090160) or 'P' to pinch.");
+    }
+  }
+}
+
+/* ------------------------------------------------
+   Helper functions
+------------------------------------------------- */
+void moveJoint(Servo &motor, int current, int target) {
+  while (current != target) {
+    current += (current < target) ? 1 : -1;
+    motor.write(current);
+    delay(15);
+  }
+}
+
+void pinchOnce() {
+  // Close
+  moveJoint(gripper, gripperAngle, gripperClosed);
+  delay(300);                      // hold pinch briefly
+  // Open
+  moveJoint(gripper, gripperClosed, gripperOpen);
+  gripperAngle = gripperOpen;      // keep state consistent
+}
+
