@@ -84,9 +84,11 @@ void loop() {
     }
 
     // ---- D = DOWN ----
-    if (command == 'D' |
-
-
-    irrecv.resume();  // Receive next signal
+    if (command == 'D' || command == 'd') {
+      Serial.println("Switch DOWN");
+      switchServo.write(switchDownPos);
+      delay(500);
+    }
   }
 }
+
