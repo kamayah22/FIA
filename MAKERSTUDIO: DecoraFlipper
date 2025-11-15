@@ -48,6 +48,45 @@ void loop() {
       delay(500);
     }
 
+
+
+
+-----------------KEYBOAARD CONTROL-------------------
+
+#include <Servo.h>
+
+// -------------------- SERVO SETTINGS --------------------
+Servo switchServo;
+int servoPin = 9;
+
+// Adjust these for your switch angles
+int switchUpPos   = 20;    // servo angle for UP
+int switchDownPos = 160;   // servo angle for DOWN
+
+void setup() {
+  Serial.begin(9600);
+  switchServo.attach(servoPin);
+
+  // Start in DOWN position
+  switchServo.write(switchDownPos);
+  Serial.println("Press U for UP, D for DOWN");
+}
+
+void loop() {
+  if (Serial.available()) {
+    char command = Serial.read();
+
+    // ---- U = UP ----
+    if (command == 'U' || command == 'u') {
+      Serial.println("Switch UP");
+      switchServo.write(switchUpPos);
+      delay(500);
+    }
+
+    // ---- D = DOWN ----
+    if (command == 'D' |
+
+
     irrecv.resume();  // Receive next signal
   }
 }
