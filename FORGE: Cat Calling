@@ -1,0 +1,62 @@
+// Pin setup
+const int buzzerPin = 9;
+const int buttonPurr = 2;
+const int buttonMeow = 3;
+
+void setup() {
+  pinMode(buzzerPin, OUTPUT);
+
+  pinMode(buttonPurr, INPUT_PULLUP); // Active LOW
+  pinMode(buttonMeow, INPUT_PULLUP); // Active LOW
+}
+
+void loop() {
+  // Buttons read LOW when pressed
+  bool purrPressed = !digitalRead(buttonPurr);
+  bool meowPressed = !digitalRead(buttonMeow);
+
+  if (purrPressed) {
+    playPurr();
+  } 
+  else if (meowPressed) {
+    playMeow();
+  } 
+  else {
+    noTone(buzzerPin);
+  }
+}
+
+void playPurr() {
+  // Cat purr is a low, vibrating rumble ~20–30 Hz
+  // But human buzzers need higher frequencies, so we simulate with fluttering tones
+  for (int i = 0; i < 50; i++) {
+    tone(buzzerPin, 120);   // low frequency rumble
+    delay(30);
+    tone(buzzerPin, 160);   // slight variation to simulate vibration
+    delay(30);
+
+    // Stop purring if button released
+    if (digitalRead(buttonPurr) == HIGH) break;
+  }
+}
+
+void playMeow() {
+  // A meow is basically a rising + falling pitch
+  // "mreeeeOOOOW"
+
+  // Rising pitch
+  for (int f = 400; f < 900; f += 5) {
+    tone(buzzerPin, f);
+    delay(5);
+    if (digitalRead(buttonMeow) == HIGH) break;
+  }
+
+  // Falling pitch
+  for (int f = 900; f > 500; f -= 5) {
+    tone(buzzerPin, f);
+    delay(5);
+    if (digitalRead(buttonMeow) == HIGH) break;
+  }
+
+  noTone(buzzerPin);
+}
