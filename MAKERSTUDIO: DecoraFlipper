@@ -1,0 +1,53 @@
+#include <IRremote.h>
+#include <Servo.h>
+
+// -------------------- IR SETTINGS --------------------
+int RECV_PIN = 12;
+IRrecv irrecv(RECV_PIN);
+decode_results results;
+
+// IR codes (IRremote 3.7.1 format)
+#define IR_Go      0x00ff629d   // Button for switch ON / UP
+#define IR_Back    0x00ffa857   // Button for switch OFF / DOWN
+
+// -------------------- SERVO SETTINGS --------------------
+Servo switchServo;
+int servoPin = 9;
+
+// Adjust these to match the physical motion needed
+int switchUpPos   = 20;   // servo angle for LIGHT ON
+int switchDownPos = 160;  // servo angle for LIGHT OFF
+
+void setup() {
+  Serial.begin(9600);
+
+  irrecv.enableIRIn();   // Start IR receiver
+  irrecv.blink13(true);  // Optional: blink pin 13 on IR receive
+
+  switchServo.attach(servoPin);
+  switchServo.write(switchDownPos); // start in OFF position
+}
+
+void loop() {
+  if (irrecv.decode(&results)) {
+
+    unsigned long code = results.value;
+    Serial.println(code, HEX);
+
+    // ---- SWITCH UP / ON ----
+    if (code == IR_Go) {
+      Serial.println("Switch UP / ON");
+      switchServo.write(switchUpPos);
+      delay(500);
+    }
+
+    // ---- SWITCH DOWN / OFF ----
+    if (code == IR_Back) {
+      Serial.println("Switch DOWN / OFF");
+      switchServo.write(switchDownPos);
+      delay(500);
+    }
+
+    irrecv.resume();  // Receive next signal
+  }
+}
